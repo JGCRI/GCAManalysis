@@ -1,0 +1,11 @@
+Package: GCAManalysis
+Title: Analysis Tools for GCAM Data
+Version: 0.1.0-alpha
+Authors@R: person("Robert", "Link", email = "robert.link@pnnl.gov", role = c("aut", "cre"))
+Description:
+	GCAManalysis provides a variety of tools and algorithms for
+	analyzing GCAM output data.  
+Depends: R (>= 3.3.3)
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
