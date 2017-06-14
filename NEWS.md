@@ -1,6 +1,6 @@
-# GCAManalysis 0.1.0-alpha
+# GCAManalysis 0.1.0
 
-* Add basic package infrastructure
+* Add trend analysis function.
 
 
 
