@@ -99,8 +99,73 @@ trend_analysis <- function(d, n=4, valuecol='value', yearcol='year')
       dplyr::mutate(year=as.integer(year)) %>%
       dplyr::rename_(.dots = stats::setNames(list('value'), valueout))
 
-    list(trends = ctr, categories = d)
+    rtn <- list(trends = ctr, categories = d)
+    class(rtn) <- 'trendanalysis'
+    rtn
 }
 
 
+#' Is an object a tendanalysis object
+#'
+#' Is method for trendanalysis class
+#'
+#' @param obj The object to test
+#' @export
+is.trendanalysis <- function(obj) {
+    inherits(obj, 'trendanalysis')
+}
 
+#' Summarize a trend analysis
+#'
+#' Summary method for trendanalysis class.
+#'
+#' The summary includes the number of trend categories and the table of category
+#' identifications.
+#'
+#' @param obj The object to summarize
+#' @export
+summary.trendanalysis <- function(obj) {
+    year <- normalized.population <- NULL
+    ntype <- length(unique(obj$trends$trend.category))
+
+    ## get the first year
+    yr1 <- dplyr::filter(obj$categories, year==1990)
+    ## keep all the character variables; these are the id vars
+    catid <- dplyr::select_if(yr1, is.character)
+    ## Add back the trend category
+    catid$trend.category <- yr1$trend.category
+    ## Arrange by trend type
+    catid <- arrange(catid, trend.category)
+
+    ## package for return
+    rtn <- list(ntype=ntype, catid=catid)
+    class(rtn) <- 'summary.trendanalysis'
+    rtn
+}
+
+#' Format a trend analysis summary for pretty-printing
+#'
+#' Format method for summary.trendanalysis class
+#'
+#' @param obj The object to format
+#' @export
+format.summary.trendanalysis <- function(obj) {
+    ## This is kind of a hacky way of doing this, but it produces a readable
+    ## table.  The row numbers on the table are kind of a wart though
+    catcount <- capture.output(table(obj$catid$trend.category))
+    catcount[1] <- 'Number of members for each trend category:'
+    c(paste('Number of trend types extracted:', obj$ntype),
+      capture.output(format(as.data.frame(obj$catid))),
+      catcount
+      )
+}
+
+#' Print a trend analysis summary
+#'
+#' Print method for summary.trendanalysis class
+#'
+#' @param obj The object to print
+#' @export
+print.summary.trendanalysis <- function(obj) {
+    cat(format(obj), sep='\n')
+}

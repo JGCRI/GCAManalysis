@@ -112,3 +112,12 @@ test_that('rising-then-falling cluster is identified.', {
               expect_gt(npmid, npstrt)
               expect_gt(npmid, npfinal)
           })
+
+test_that('summary of trend analysis can be displayed.', {
+              expect_silent({s <- summary(poptrends)})
+              expect_equal(names(s), c('ntype', 'catid'))
+
+              ## print method just cats the output of format, so if format
+              ## works, it will too.
+              expect_true(is.character(format(s)))
+          })
