@@ -14,7 +14,8 @@ data format.}
 is not recommended.}
 
 \item{valuecol}{Name of the column with the data values in it.  The output
-trends will also use this name for their value column.}
+trends will prepend 'normalized.' to this name for the name of their value
+column.}
 
 \item{yearcol}{Name of the column with the year values in it.  The output
 trends will also use this name for their year column.}
@@ -64,3 +65,17 @@ the trend categories returned.  This table tells you which regions have
 population trends like those in each of the trend categories.
 }
 
+\section{Methods}{
+
+
+The structure returned by the trend analysis has a summary method that prints
+a table of which data ponts were assigned to which categories, along with a
+count of how many data points were assigned to each category.
+}
+
+\examples{
+data(population)
+poptrends <- trend_analysis(population, n=4, valuecol='population')
+summary(poptrends)
+
+}

@@ -40,12 +40,24 @@
 #' the trend categories returned.  This table tells you which regions have
 #' population trends like those in each of the trend categories.
 #'
+#' @section Methods:
+#'
+#' The structure returned by the trend analysis has a summary method that prints
+#' a table of which data ponts were assigned to which categories, along with a
+#' count of how many data points were assigned to each category.
+#'
+#' @examples
+#' data(population)
+#' poptrends <- trend_analysis(population, n=4, valuecol='population')
+#' summary(poptrends)
+#'
 #' @param d The data to analyze.  See details for a description of the input
 #'  data format.
 #' @param n Number of categories to produce.  For 32-region data, setting n > 8
 #'  is not recommended.
 #' @param valuecol Name of the column with the data values in it.  The output
-#'  trends will also use this name for their value column.
+#'  trends will prepend 'normalized.' to this name for the name of their value
+#'  column.
 #' @param yearcol Name of the column with the year values in it.  The output
 #'  trends will also use this name for their year column.
 #' @importFrom magrittr "%>%"
@@ -109,10 +121,10 @@ trend_analysis <- function(d, n=4, valuecol='value', yearcol='year')
 #'
 #' Is method for trendanalysis class
 #'
-#' @param obj The object to test
+#' @inheritParams methods::is
 #' @export
-is.trendanalysis <- function(obj) {
-    inherits(obj, 'trendanalysis')
+is.trendanalysis <- function(object) {
+    inherits(object, 'trendanalysis')
 }
 
 #' Summarize a trend analysis
@@ -122,20 +134,20 @@ is.trendanalysis <- function(obj) {
 #' The summary includes the number of trend categories and the table of category
 #' identifications.
 #'
-#' @param obj The object to summarize
+#' @inheritParams base::summary
 #' @export
-summary.trendanalysis <- function(obj) {
-    year <- normalized.population <- NULL
-    ntype <- length(unique(obj$trends$trend.category))
+summary.trendanalysis <- function(object, ...) {
+    year <- trend.category <- NULL
+    ntype <- length(unique(object$trends$trend.category))
 
     ## get the first year
-    yr1 <- dplyr::filter(obj$categories, year==1990)
+    yr1 <- dplyr::filter(object$categories, year==1990)
     ## keep all the character variables; these are the id vars
     catid <- dplyr::select_if(yr1, is.character)
     ## Add back the trend category
     catid$trend.category <- yr1$trend.category
     ## Arrange by trend type
-    catid <- arrange(catid, trend.category)
+    catid <- dplyr::arrange(catid, trend.category)
 
     ## package for return
     rtn <- list(ntype=ntype, catid=catid)
@@ -147,15 +159,16 @@ summary.trendanalysis <- function(obj) {
 #'
 #' Format method for summary.trendanalysis class
 #'
-#' @param obj The object to format
+#' @inheritParams base::format
 #' @export
-format.summary.trendanalysis <- function(obj) {
+#' @importFrom utils capture.output
+format.summary.trendanalysis <- function(x, ...) {
     ## This is kind of a hacky way of doing this, but it produces a readable
     ## table.  The row numbers on the table are kind of a wart though
-    catcount <- capture.output(table(obj$catid$trend.category))
+    catcount <- capture.output(table(x$catid$trend.category))
     catcount[1] <- 'Number of members for each trend category:'
-    c(paste('Number of trend types extracted:', obj$ntype),
-      capture.output(format(as.data.frame(obj$catid))),
+    c(paste('Number of trend types extracted:', x$ntype),
+      capture.output(format(as.data.frame(x$catid))),
       catcount
       )
 }
@@ -164,8 +177,8 @@ format.summary.trendanalysis <- function(obj) {
 #'
 #' Print method for summary.trendanalysis class
 #'
-#' @param obj The object to print
+#' @inheritParams base::print
 #' @export
-print.summary.trendanalysis <- function(obj) {
-    cat(format(obj), sep='\n')
+print.summary.trendanalysis <- function(x, ...) {
+    cat(format(x), sep='\n')
 }
