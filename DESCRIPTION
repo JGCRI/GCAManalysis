@@ -16,4 +16,7 @@ Imports:
 	tidyr (>= 0.6.3),
 	ggplot2 (>= 2.2.1)
 Suggests: testthat,
-    covr
+    covr,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

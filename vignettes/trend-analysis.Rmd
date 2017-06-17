@@ -1,0 +1,72 @@
+---
+title: "Running Trend Analyses on GCAM Data"
+author: "Robert Link"
+date: "2017-06-17"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The `trend_analysis` function allows you to identify a selection of shared trend
+types in your GCAM output and categorize the data by trend type.  For example,
+if you were looking at population data by region you might have some regions
+where population is gowing, some mostly stable, and so on.  
+
+## Preparing the data
+
+To run the trend analysis your data should be in long format.  We'll use the
+Reference scenario population as an example.
+```{r setup}
+library(GCAManalysis)
+data(population)
+head(population)
+```
+There must be columns with the year and the data to be analyzed.  They can have
+any names you like; you'll get a chance to specify the names when you run the
+analysis.  Here they are called `year` and `population`.  Any remaining columns
+are id columns; they define the groupings of the data into time series.  In this
+case there is only one, `region`.  If your data has columns that you don't want
+to use as groupings (e.g., maybe you have data down to the subsector, but you
+only want to analyze by region and sector), then you will need to aggregate
+appropriately before you run the analysis.
+
+## Usage
+
+Run the trend analysis and save the results.
+```{r analysis, echo=-1}
+set.seed(8675309)
+tr <- trend_analysis(population, n=4, valuecol='population', yearcol='year')
+```
+The `n` argument determines the number of trend categories to find.  You might
+have to experiment a bit to find the right number of categories for any
+particular dataset.  A good rule of thumb is to use about one tenth the number
+of time series.  The remaining two arguments indicate which columns hold the
+years and values.  They can be omitted if the columns have their default names
+of "year" and "value", respectively.
+
+The return value contains two data frames.  The `trend` element has the trends
+that were identified.  Each row has one data point for one of the prototype
+trends.  The `trend.category` column identifies the trend category.  The column
+with the years will always be called `year`, regardless of what it was called in
+the original data.  The value column will be normalized such that the largest
+value is 1.  It will be named "normalized.whatever", where "whatever" is the
+name of the value column in the original data, so in this example,
+`normalized.population`.  
+
+The `categories` element has the original data, normalized as in the trend
+prototypes.  The `trend.category` column indicates which trend category each
+time series belonged to.
+
+The return object has a couple of methods defined to make analysis more
+convenient.  The `summary` method produces a table of category assignments and a
+count of the number of time series assigned to each category.
+
+```{r summary}
+summary(tr)
+```
+
+```{r plot, fig.width=7, fig.height=6}
+plot(tr)
+```
