@@ -121,3 +121,14 @@ test_that('summary of trend analysis can be displayed.', {
               ## works, it will too.
               expect_true(is.character(format(s)))
           })
+
+test_that('trend analysis can be plotted.', {
+              fn = tempfile(fileext='.png')
+              png(filename=fn)
+              on.exit(unlink(fn))
+              expect_silent(print(plot(poptrends)))
+              dev.off()
+              expect_true(file.exists(fn))
+          })
+
+

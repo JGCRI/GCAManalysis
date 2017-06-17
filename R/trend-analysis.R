@@ -44,12 +44,17 @@
 #'
 #' The structure returned by the trend analysis has a summary method that prints
 #' a table of which data ponts were assigned to which categories, along with a
-#' count of how many data points were assigned to each category.
+#' count of how many data points were assigned to each category.  There is also
+#' a plot method that will plot a visualization of the trend categories and
+#' their members.
 #'
 #' @examples
 #' data(population)
 #' poptrends <- trend_analysis(population, n=4, valuecol='population')
 #' summary(poptrends)
+#' \dontrun{
+#' plot(poptrends)
+#' }
 #'
 #' @param d The data to analyze.  See details for a description of the input
 #'  data format.
@@ -59,7 +64,7 @@
 #'  trends will prepend 'normalized.' to this name for the name of their value
 #'  column.
 #' @param yearcol Name of the column with the year values in it.  The output
-#'  trends will also use this name for their year column.
+#'  trends will always call their year column "year".
 #' @importFrom magrittr "%>%"
 #' @export
 trend_analysis <- function(d, n=4, valuecol='value', yearcol='year')
@@ -181,4 +186,46 @@ format.summary.trendanalysis <- function(x, ...) {
 #' @export
 print.summary.trendanalysis <- function(x, ...) {
     cat(format(x), sep='\n')
+}
+
+#' Plot a trend analysis
+#'
+#' Plot method for the trendanalysis class. Note that we use ggplot to actually
+#' render the plot, not base graphics.
+#'
+#' @param x The trendanalysis object to plot
+#' @param y ignored
+#' @param ... ignored
+#' @export
+plot.trendanalysis <- function(x, y, ...) {
+    trends <- x$trends
+    cats <- x$categories
+
+    ## first we have to figure out what the name of the column with the data in
+    ## it is.  (It will be the same in both the trends and categories.
+    valuecol = grep('normalized\\.', names(trends), value=TRUE)
+
+
+    ## next we have to figure out the id columns and assign each id category a
+    ## unique identifier in a single column.  We will need this for grouping in
+    ## the plot.
+    idcols <- dplyr::setdiff(names(cats), c(valuecol, 'year', 'trend.category'))
+    idtbl <- dplyr::select(cats, dplyr::one_of(idcols)) %>% dplyr::distinct()
+    idtbl$group <- row(idtbl)
+    ## add the group back to the table
+    cats <- dplyr::left_join(cats, idtbl, by=idcols)
+
+    ## Awesome.  Now we can make our plot.  We're going to facet by trend type,
+    ## plot the prototype trend in a heavy line, and plot the time series from
+    ## the data in light lines.
+
+    ggplot2::ggplot() + ggplot2::facet_wrap(facets=~trend.category) +
+      ggplot2::geom_line(data=trends,
+                         mapping= ggplot2::aes_string(x='year', y=valuecol),
+                         group=-1,
+                         size=1.5, color="black") +
+      ggplot2::geom_line(data=cats,
+                         mapping= ggplot2::aes_string(x='year', y=valuecol, group='group'),
+                         color='black', size=0.5, alpha=0.5)
+
 }

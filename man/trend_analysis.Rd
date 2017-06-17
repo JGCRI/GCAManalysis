@@ -18,7 +18,7 @@ trends will prepend 'normalized.' to this name for the name of their value
 column.}
 
 \item{yearcol}{Name of the column with the year values in it.  The output
-trends will also use this name for their year column.}
+trends will always call their year column "year".}
 }
 \description{
 This function analyzes trends in an input table of GCAM data values over
@@ -70,12 +70,17 @@ population trends like those in each of the trend categories.
 
 The structure returned by the trend analysis has a summary method that prints
 a table of which data ponts were assigned to which categories, along with a
-count of how many data points were assigned to each category.
+count of how many data points were assigned to each category.  There is also
+a plot method that will plot a visualization of the trend categories and
+their members.
 }
 
 \examples{
 data(population)
 poptrends <- trend_analysis(population, n=4, valuecol='population')
 summary(poptrends)
+\dontrun{
+plot(poptrends)
+}
 
 }
