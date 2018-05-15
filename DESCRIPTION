@@ -5,7 +5,7 @@ Authors@R: person("Robert", "Link", email = "robert.link@pnnl.gov", role = c("au
 Description:
 	GCAManalysis provides a variety of tools and algorithms for
 	analyzing GCAM output data.  
-Depends: R (>= 3.3.3)
+Depends: R (>= 3.3)
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
